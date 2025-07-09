@@ -13,9 +13,14 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 import Sidebar from "@/components/layout/Sidebar";
+import Image from "next/image";
+import Logo from "@/public/logo.png";
 
-
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const supabase = await createClient();
   const {
     data: { session },
@@ -25,9 +30,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <div className="h-screen flex flex-col md:flex-row overflow-hidden">
-    
       <header className="md:hidden flex items-center justify-between p-4 bg-gray-900 text-white">
-        <div className="text-lg font-bold">MoneyTrack</div>
+        <Image
+          src={Logo}
+          alt="MoneyTrack Logo"
+          width={80}
+          height={60}
+          className="object-contain"
+        />
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-white">
@@ -55,4 +65,3 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     </div>
   );
 }
-

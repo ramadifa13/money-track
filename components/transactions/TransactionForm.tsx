@@ -32,7 +32,10 @@ import {
 } from "@/app/actions/transactions";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { format, parseISO } from "date-fns";
+import { Calendar } from "../ui/calendar";
 
 interface Category {
   id: string;
@@ -64,9 +67,7 @@ export function TransactionForm({
     defaultValues: defaultValues || {
       amount: 0,
       type: "income",
-      date: new Date(Date.now() + 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
+      date: new Date().toISOString().split("T")[0],
       note: "",
       categoryId: "",
     },
@@ -108,6 +109,7 @@ export function TransactionForm({
         `Transaksi berhasil ${isEdit ? "diperbarui" : "ditambahkan"}`
       );
       reset();
+      setFormattedAmount("");
       setOpen(false);
       if (onSuccess) await onSuccess();
     }
@@ -137,7 +139,20 @@ export function TransactionForm({
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        if (!isOpen) reset();
+        if (!isOpen) {
+          reset(
+            defaultValues || {
+              amount: 0,
+              type: "income",
+              date: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[0],
+              note: "",
+              categoryId: "",
+            }
+          );
+          setFormattedAmount("");
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -202,7 +217,33 @@ export function TransactionForm({
 
           <div className="grid gap-2">
             <Label htmlFor="date">Tanggal</Label>
-            <Input id="date" type="date" {...register("date")} />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`w-full justify-start text-left font-normal ${
+                    !watch("date") && "text-muted-foreground"
+                  }`}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {watch("date")
+                    ? format(parseISO(watch("date")), "dd MMMM yyyy")
+                    : "Pilih tanggal"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={parseISO(watch("date"))}
+                  onSelect={(date) => {
+                    if (date) {
+                      form.setValue("date", date.toISOString().split("T")[0]);
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             {errors.date && (
               <p className="text-xs text-red-500">{errors.date.message}</p>
             )}

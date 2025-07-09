@@ -16,14 +16,22 @@ import {
 import { navItems } from "./navItems";
 import { LogOut } from "lucide-react";
 import SidebarLink from "./SidebarLink";
+import Image from "next/image";
+import Logo from "@/public/logo.png";
 
 export default function Sidebar() {
   return (
     <>
       <div>
-        <div className="p-6 text-2xl font-bold border-b border-white/10">
-          MoneyTrack
-        </div>
+        <div className="flex items-center justify-center p-6 border-b border-white/10">
+        <Image
+          src={Logo}
+          alt="MoneyTrack Logo"
+          width={100}
+          height={100}
+          className="object-contain"
+        />
+      </div>
         <nav className="mt-4 flex flex-col gap-1 px-4">
           {navItems.map(({ href, label, icon }) => (
             <SidebarLink key={href} href={href} icon={icon}>

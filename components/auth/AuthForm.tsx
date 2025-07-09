@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -18,7 +17,17 @@ export function AuthForm({ type, action }: AuthFormProps) {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { setLoading } = useLoading();
 
-  const title = type === "login" ? "Masuk ke Akun" : "Buat Akun";
+  const titleConfig = {
+    login: {
+      heading: "Selamat datang kembali 👋",
+      subtext: "Masuk untuk melanjutkan pengelolaan keuangan Anda.",
+    },
+    register: {
+      heading: "Buat Akun Baru 📝",
+      subtext: "Daftarkan dirimu dan mulai atur keuangan dengan lebih mudah.",
+    },
+  };
+
   const buttonLabel = type === "login" ? "Masuk" : "Daftar";
   const switchLabel =
     type === "login" ? "Belum punya akun?" : "Sudah punya akun?";
@@ -55,14 +64,17 @@ export function AuthForm({ type, action }: AuthFormProps) {
 
     try {
       await action(formData);
-      toast.success(
-        type === "login" ? "Berhasil masuk" : "Registrasi berhasil"
-      );
-    } catch (e: any) {
-      if (e.message?.includes("NEXT_REDIRECT")) return;
-      const message = e.message || "Terjadi kesalahan";
-      setError(message);
-      toast.error(message);
+      toast.success(type === "login" ? "Berhasil masuk" : "Registrasi berhasil");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        if (e.message?.includes("NEXT_REDIRECT")) return;
+        const message = e.message || "Terjadi kesalahan";
+        setError(message);
+        toast.error(message);
+      } else {
+        setError("Terjadi kesalahan yang tidak diketahui");
+        toast.error("Terjadi kesalahan yang tidak diketahui");
+      }
     } finally {
       setLoading(false);
     }
@@ -76,75 +88,63 @@ export function AuthForm({ type, action }: AuthFormProps) {
       onSubmit={handleSubmit}
       className="space-y-5"
     >
-      <h2 className="text-xl font-semibold text-center text-gray-700">
-        {title}
-      </h2>
+      <div className="text-center mb-2">
+        <h2 className="text-2xl font-bold text-gray-800">
+          {titleConfig[type].heading}
+        </h2>
+        <p className="text-sm text-gray-500">{titleConfig[type].subtext}</p>
+      </div>
 
       {type === "register" && (
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Nama Lengkap
           </label>
           <input
             type="text"
             name="name"
             id="name"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
-          {formErrors.name && (
-            <p className="text-sm text-red-600">{formErrors.name}</p>
-          )}
+          {formErrors.name && <p className="text-sm text-red-600">{formErrors.name}</p>}
         </div>
       )}
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
           Email
         </label>
         <input
           type="email"
           name="email"
           id="email"
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
-        {formErrors.email && (
-          <p className="text-sm text-red-600">{formErrors.email}</p>
-        )}
+        {formErrors.email && <p className="text-sm text-red-600">{formErrors.email}</p>}
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
           Password
         </label>
         <input
           type="password"
           name="password"
           id="password"
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
-        {formErrors.password && (
-          <p className="text-sm text-red-600">{formErrors.password}</p>
-        )}
+        {formErrors.password && <p className="text-sm text-red-600">{formErrors.password}</p>}
       </div>
 
       {error && <p className="text-red-600 text-sm text-center">{error}</p>}
 
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition">
         {buttonLabel}
       </Button>
 
       <p className="text-sm text-center text-gray-600">
         {switchLabel}{" "}
-        <a href={switchLink} className="text-blue-600 hover:underline">
+        <a href={switchLink} className="text-blue-600 hover:underline font-medium">
           {type === "login" ? "Daftar di sini" : "Masuk di sini"}
         </a>
       </p>
